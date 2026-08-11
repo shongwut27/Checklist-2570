@@ -1,0 +1,6 @@
+{
+  "name": "FIN.MFU Checklist",
+  "description": "ระบบ CHECKLIST เอกสารส่วนการเงินและบัญชี มหาวิทยาลัยแม่ฟ้าหลวง",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
