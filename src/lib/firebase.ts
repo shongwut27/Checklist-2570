@@ -1,68 +1,21 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, User } from 'firebase/auth';
-import firebaseConfig from '../../firebase-applet-config.json';
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyBn8i_3MgMxTRVo_xB_FxTNJ7btWtoBpyU",
+  authDomain: "checklist-a3cbd.firebaseapp.com",
+  projectId: "checklist-a3cbd",
+  storageBucket: "checklist-a3cbd.firebasestorage.app",
+  messagingSenderId: "69776132553",
+  appId: "1:69776132553:web:4408cfa7d642db4d024018",
+  measurementId: "G-D1T0Y0D3G5"
+};
+
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-
-export const provider = new GoogleAuthProvider();
-provider.addScope('https://www.googleapis.com/auth/drive');
-provider.addScope('https://www.googleapis.com/auth/spreadsheets');
-provider.addScope('https://www.googleapis.com/auth/presentations');
-
-let isSigningIn = false;
-let cachedAccessToken: string | null = localStorage.getItem('google_access_token');
-
-export const getAccessToken = () => cachedAccessToken;
-
-export const initAuth = (
-  onAuthSuccess?: (user: User, token: string) => void,
-  onAuthFailure?: () => void
-) => {
-  return onAuthStateChanged(auth, async (user: User | null) => {
-    if (user) {
-      if (cachedAccessToken) {
-        if (onAuthSuccess) onAuthSuccess(user, cachedAccessToken);
-      } else if (!isSigningIn) {
-        if (onAuthFailure) onAuthFailure();
-      }
-    } else {
-      cachedAccessToken = null;
-      localStorage.removeItem('google_access_token');
-      if (onAuthFailure) onAuthFailure();
-    }
-  });
-};
-
-export const googleSignIn = async (): Promise<{ user: User; accessToken: string } | null> => {
-  try {
-    isSigningIn = true;
-    const result = await signInWithPopup(auth, provider);
-    const credential = GoogleAuthProvider.credentialFromResult(result);
-    const accessToken = credential?.accessToken;
-
-    if (!accessToken) {
-      throw new Error("Failed to obtain Google access token.");
-    }
-
-    cachedAccessToken = accessToken;
-    localStorage.setItem('google_access_token', accessToken);
-    return { user: result.user, accessToken };
-  } catch (error) {
-    console.error("Error during Google sign-in:", error);
-    throw error;
-  } finally {
-    isSigningIn = false;
-  }
-};
-
-export const logout = async (): Promise<void> => {
-  try {
-    await auth.signOut();
-    cachedAccessToken = null;
-    localStorage.removeItem('google_access_token');
-  } catch (error) {
-    console.error("Error signing out:", error);
-    throw error;
-  }
-};
+const analytics = getAnalytics(app);
