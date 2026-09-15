@@ -331,7 +331,7 @@ export const PdfCoverSheet: React.FC<PdfCoverSheetProps> = ({ record, onClose })
                 ตั้งค่าและพิมพ์เอกสาร
               </h2>
               <p className="text-xs text-amber-200/90 font-medium">
-                Word-Style Print Studio (2570-CHECKLIST)
+                Word-Style Print Studio ((2570)CHECKLIST)
               </p>
             </div>
           </div>
@@ -540,8 +540,20 @@ export const PdfCoverSheet: React.FC<PdfCoverSheetProps> = ({ record, onClose })
                         <span>หน่วยงาน</span>
                         <span className="font-mono text-xs font-black text-amber-950">({record.cabinetId})</span>
                       </div>
-                      <div className="p-2.5 text-base sm:text-lg font-black text-black leading-snug">
-                        {record.dept || '-'}
+                      <div className="p-2 sm:p-2.5 text-black leading-tight">
+                        {(() => {
+                          if (!record.dept) return '-';
+                          const lines = record.dept.split('\n').map((l) => l.trim()).filter(Boolean);
+                          if (lines.length > 1) {
+                            return (
+                              <div className="flex flex-col gap-0.5">
+                                <span className="text-sm sm:text-base font-black text-black leading-tight">{lines[0]}</span>
+                                <span className="text-xs sm:text-sm font-semibold text-gray-700 leading-tight">{lines[1]}</span>
+                              </div>
+                            );
+                          }
+                          return <span className="text-sm sm:text-base font-black text-black leading-tight">{record.dept}</span>;
+                        })()}
                       </div>
                     </div>
                     <div className="col-span-5">

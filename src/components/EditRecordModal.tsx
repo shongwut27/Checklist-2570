@@ -33,7 +33,7 @@ export const EditRecordModal: React.FC<EditRecordModalProps> = ({
     description: record.description || '',
   });
 
-  const [deptSearch, setDeptSearch] = useState(record.dept || '');
+  const [deptSearch, setDeptSearch] = useState((record.dept || '').replace('\n', ' - '));
   const [isDeptFocused, setIsDeptFocused] = useState(false);
   const [deptError, setDeptError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -47,21 +47,41 @@ export const EditRecordModal: React.FC<EditRecordModalProps> = ({
     setTimeout(() => {
       setIsDeptFocused(false);
       if (deptSearch.trim() !== '') {
-        const isMatch = MFU_DEPARTMENTS.includes(deptSearch.trim());
-        if (!isMatch) {
+        const query = deptSearch.trim().toLowerCase();
+        const matched = MFU_DEPARTMENTS.find((d) => {
+          const lower = d.toLowerCase();
+          const dashVersion = lower.replace('\n', ' - ');
+          const spaceVersion = lower.replace('\n', ' ');
+          const firstLine = d.split('\n')[0].trim().toLowerCase();
+          const secondLine = d.split('\n')[1] ? d.split('\n')[1].trim().toLowerCase() : '';
+
+          return (
+            lower === query ||
+            dashVersion === query ||
+            spaceVersion === query ||
+            firstLine === query ||
+            secondLine === query ||
+            dashVersion.includes(query) ||
+            spaceVersion.includes(query) ||
+            lower.includes(query)
+          );
+        });
+
+        if (!matched) {
           setDeptError('กรุณาเลือกชื่อหน่วยงานจากรายการที่กำหนดให้เท่านั้นครับ');
           setFormData((prev) => ({ ...prev, dept: '' }));
           setDeptSearch('');
         } else {
           setDeptError('');
-          setFormData((prev) => ({ ...prev, dept: deptSearch.trim() }));
+          setFormData((prev) => ({ ...prev, dept: matched }));
+          setDeptSearch(matched.replace('\n', ' - '));
         }
       }
     }, 200);
   };
 
   const handleSelectDept = (deptName: string) => {
-    setDeptSearch(deptName);
+    setDeptSearch(deptName.replace('\n', ' - '));
     setFormData((prev) => ({ ...prev, dept: deptName }));
     setDeptError('');
     setIsDeptFocused(false);
@@ -162,9 +182,14 @@ export const EditRecordModal: React.FC<EditRecordModalProps> = ({
     }
   };
 
-  const filteredDepts = MFU_DEPARTMENTS.filter((d) =>
-    d.toLowerCase().includes(deptSearch.toLowerCase())
-  );
+  const filteredDepts = MFU_DEPARTMENTS.filter((d) => {
+    const query = deptSearch.toLowerCase().trim();
+    if (!query) return true;
+    const lower = d.toLowerCase();
+    const dashVersion = lower.replace('\n', ' - ');
+    const spaceVersion = lower.replace('\n', ' ');
+    return lower.includes(query) || dashVersion.includes(query) || spaceVersion.includes(query);
+  });
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
@@ -262,16 +287,22 @@ export const EditRecordModal: React.FC<EditRecordModalProps> = ({
 
               {isDeptFocused && filteredDepts.length > 0 && (
                 <div className="absolute z-30 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-48 overflow-y-auto divide-y divide-gray-100">
-                  {filteredDepts.map((d, i) => (
-                    <div
-                      key={i}
-                      onMouseDown={() => handleSelectDept(d)}
-                      className="px-3 py-2 hover:bg-red-50 hover:text-[#800000] cursor-pointer font-medium transition flex items-center justify-between"
-                    >
-                      <span>{d}</span>
-                      <span className="text-[10px] text-gray-400 font-mono">ตู้: {getCabinetic(d)}</span>
-                    </div>
-                  ))}
+                  {filteredDepts.map((d, i) => {
+                    const parts = d.split('\n');
+                    return (
+                      <div
+                        key={i}
+                        onMouseDown={() => handleSelectDept(d)}
+                        className="px-3 py-2 hover:bg-red-50 hover:text-[#800000] cursor-pointer font-medium transition flex items-center justify-between gap-2"
+                      >
+                        <div className="flex flex-col text-left">
+                          <span className="font-semibold text-gray-900">{parts[0]}</span>
+                          {parts[1] && <span className="text-[11px] text-gray-500 font-normal">{parts[1]}</span>}
+                        </div>
+                        <span className="text-[10px] text-gray-400 font-mono shrink-0">ตู้: {getCabinetId(d)}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>

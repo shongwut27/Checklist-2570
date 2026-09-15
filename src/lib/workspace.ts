@@ -58,7 +58,7 @@ function getValueForPlaceholderKey(key: string, record: ChecklistRecord): string
 }
 
 /**
- * Append a row to Google Sheet 2570-CHECKLIST using Google Sheets API
+ * Append a row to Google Sheet (2570)CHECKLIST using Google Sheets API
  */
 export async function appendRecordToSheet(record: ChecklistRecord, accessToken: string, spreadsheetId: string, sheetName: string) {
   try {
@@ -80,7 +80,8 @@ export async function appendRecordToSheet(record: ChecklistRecord, accessToken: 
       record.editLog || '-',
     ];
 
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(sheetName)}!A:O:append?valueInputOption=USER_ENTERED`;
+    const targetRange = `'${sheetName.replace(/'/g, "''")}'!A:O`;
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(targetRange)}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
     const res = await fetch(url, {
       method: 'POST',
       headers: {
@@ -95,6 +96,9 @@ export async function appendRecordToSheet(record: ChecklistRecord, accessToken: 
     if (!res.ok) {
       const errJson = await res.json().catch(() => null);
       console.warn('Google Sheet append error:', errJson);
+      if (res.status === 401) {
+        localStorage.removeItem('google_access_token');
+      }
       return false;
     }
     return true;
@@ -106,7 +110,8 @@ export async function appendRecordToSheet(record: ChecklistRecord, accessToken: 
 
 export async function updateRecordInSheet(record: ChecklistRecord, accessToken: string, spreadsheetId: string, sheetName: string) {
   try {
-    const getUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(sheetName)}!A:A?t=${Date.now()}`;
+    const getRange = `'${sheetName.replace(/'/g, "''")}'!A:A`;
+    const getUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(getRange)}?t=${Date.now()}`;
     const getRes = await fetch(getUrl, { 
       headers: { 
         Authorization: `Bearer ${accessToken}`,
@@ -144,7 +149,8 @@ export async function updateRecordInSheet(record: ChecklistRecord, accessToken: 
       record.editLog || '-',
     ];
     
-    const updateUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(sheetName)}!A${rowIndex}:O${rowIndex}?valueInputOption=USER_ENTERED`;
+    const updateRange = `'${sheetName.replace(/'/g, "''")}'!A${rowIndex}:O${rowIndex}`;
+    const updateUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(updateRange)}?valueInputOption=USER_ENTERED`;
     const updateRes = await fetch(updateUrl, {
       method: 'PUT',
       headers: {
@@ -163,7 +169,8 @@ export async function updateRecordInSheet(record: ChecklistRecord, accessToken: 
 
 export async function fetchRecordsFromSheet(accessToken: string, spreadsheetId: string, sheetName: string): Promise<ChecklistRecord[] | null> {
   try {
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(sheetName)}!A:O?t=${Date.now()}`;
+    const fetchRange = `'${sheetName.replace(/'/g, "''")}'!A:O`;
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(fetchRange)}?t=${Date.now()}`;
     const res = await fetch(url, { 
       headers: { 
         Authorization: `Bearer ${accessToken}`,

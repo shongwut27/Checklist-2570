@@ -19,6 +19,7 @@ export default function App() {
   const [userEmail, setUserEmail] = useState<string>('shongwut.tab@mfu.ac.th');
   const [googleUser, setGoogleUser] = useState<User | null>(null);
   const [googleToken, setGoogleToken] = useState<string | null>(null);
+  const [isAuthChecking, setIsAuthChecking] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRocketLoading, setIsRocketLoading] = useState<boolean>(false);
   
@@ -32,34 +33,59 @@ export default function App() {
   const [isConfigOpen, setIsConfigOpen] = useState<boolean>(false);
   const [webhookConfig, setWebhookConfig] = useState<WebhookConfig>({
     spreadsheetId: '1Uxci-m9YhP7SFYF098f-kVdYgyXyRQ0gTuIUYghX3Fc',
-    sheetName: '2570-CHECKLIST',
+    sheetName: '(2570)CHECKLIST',
     gasWebhookUrl: localStorage.getItem('gasWebhookUrl') || '',
   });
 
   useEffect(() => {
     // Initialize Firebase Google Auth listener
     const unsubscribe = initAuth(
-      (user, token) => {
+      async (user, token) => {
+        const email = user.email || '';
+        if (!email.toLowerCase().endsWith('@mfu.ac.th')) {
+          await logout();
+          setGoogleUser(null);
+          setGoogleToken(null);
+          setIsAuthChecking(false);
+          return;
+        }
         setGoogleUser(user);
         setGoogleToken(token);
-        if (user.email) setUserEmail(user.email);
+        setUserEmail(email);
+        setIsAuthChecking(false);
       },
       () => {
         setGoogleUser(null);
         setGoogleToken(null);
+        setIsAuthChecking(false);
       }
     );
-    return () => unsubscribe();
+    const timeout = setTimeout(() => {
+      setIsAuthChecking(false);
+    }, 1500);
+
+    return () => {
+      unsubscribe();
+      clearTimeout(timeout);
+    };
   }, []);
 
   const handleGoogleSignIn = async () => {
     try {
       const res = await googleSignIn();
       if (res) {
+        const email = res.user.email || '';
+        if (!email.toLowerCase().endsWith('@mfu.ac.th')) {
+          await logout();
+          setGoogleUser(null);
+          setGoogleToken(null);
+          alert(`ขออภัย บัญชี ${email} ไม่สามารถเข้าใช้งานได้\nระบบกำหนดสิทธิ์เฉพาะผู้ใช้งานอีเมล @mfu.ac.th เท่านั้น`);
+          return;
+        }
         setGoogleUser(res.user);
         setGoogleToken(res.accessToken);
-        if (res.user.email) setUserEmail(res.user.email);
-        alert(`เข้าสู่ระบบด้วย Google เรียบร้อยแล้ว (${res.user.email})`);
+        setUserEmail(email);
+        alert(`เข้าสู่ระบบด้วย Google เรียบร้อยแล้ว (${email})`);
       }
     } catch (err: any) {
       console.error('Google login failed:', err);
@@ -193,13 +219,22 @@ export default function App() {
         let rec: ChecklistRecord = json.record;
 
         // Direct Google Workspace API sync if signed in
-        const currentToken = googleToken || getAccessToken();
+        let currentToken = googleToken || getAccessToken();
         if (currentToken) {
           try {
             // Append row in Google Sheet
-            const appendSuccess = await appendRecordToSheet(rec, currentToken, webhookConfig.spreadsheetId, webhookConfig.sheetName);
+            let appendSuccess = await appendRecordToSheet(rec, currentToken, webhookConfig.spreadsheetId, webhookConfig.sheetName);
             if (!appendSuccess) {
-              alert("ไม่สามารถบันทึกข้อมูลลง Google Sheet ได้ กรุณาตรวจสอบการตั้งค่า Sheet ID, ชื่อชีต, หรือลองออกจากระบบแล้วเข้าสู่ระบบ Google ใหม่อีกครั้ง");
+              // Token might be expired, try refreshing via Google popup
+              const authRes = await googleSignIn().catch(() => null);
+              if (authRes?.accessToken) {
+                setGoogleToken(authRes.accessToken);
+                setGoogleUser(authRes.user);
+                appendSuccess = await appendRecordToSheet(rec, authRes.accessToken, webhookConfig.spreadsheetId, webhookConfig.sheetName);
+              }
+            }
+            if (!appendSuccess) {
+              alert("ไม่สามารถบันทึกข้อมูลลง Google Sheet ได้ กรุณาตรวจสอบสิทธิ์การเข้าถึงชีต หรือลองเข้าสู่ระบบ Google ใหม่อีกครั้ง");
             }
           } catch (wsErr) {
             console.warn('Workspace sync error:', wsErr);
@@ -293,6 +328,102 @@ export default function App() {
       }
     }
   };
+
+  if (isAuthChecking) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="text-center space-y-3">
+          <div className="w-10 h-10 border-4 border-[#800000] border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-sm text-gray-500 font-medium">กำลังตรวจสอบข้อมูลการเข้าสู่ระบบ...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!googleUser) {
+    return (
+      <div className="min-h-screen bg-gray-100 text-gray-800 flex flex-col justify-between">
+        {/* Top Header Banner in MFU Deep Maroon */}
+        <header className="bg-[#800000] text-white px-4 sm:px-6 py-4 sm:py-5 shadow-md shrink-0">
+          <div className="max-w-6xl mx-auto flex items-center gap-4 sm:gap-6">
+            <MfuLogo className="h-16 sm:h-20 md:h-24 w-auto object-contain" />
+            <div className="flex flex-col justify-center text-[#FFD700]">
+              <h1 className="text-lg sm:text-2xl md:text-3xl font-extrabold tracking-widest leading-tight">CHECKLIST</h1>
+              <h2 className="text-xs sm:text-base md:text-lg font-medium leading-snug">ส่วนการเงินและบัญชี มหาวิทยาลัยแม่ฟ้าหลวง</h2>
+              <h3 className="text-[9px] sm:text-xs md:text-sm font-light tracking-wide leading-snug">DIVISION OF FINANCE AND ACCOUNTING MAE FAH LUANG UNIVERSITY</h3>
+            </div>
+          </div>
+        </header>
+
+        {/* Center Registration Card (Enlarged) */}
+        <main className="flex-1 flex items-center justify-center px-4 py-8 sm:py-16">
+          <div className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-gray-200 overflow-hidden text-center">
+            <div className="bg-[#800000] py-8 px-6 sm:py-10 sm:px-8 text-white text-center">
+              <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-white/20 shadow-inner">
+                <LogIn className="w-10 h-10 text-[#FFD700]" />
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-wide">เข้าสู่ระบบ / ลงทะเบียน</h2>
+              <p className="text-sm sm:text-base text-amber-200 mt-2 font-medium">ระบบ CHECKLIST ตรวจสอบเอกสารการเงินและบัญชี</p>
+            </div>
+
+            <div className="p-8 sm:p-12 space-y-8">
+              <div className="space-y-3">
+                <p className="text-lg sm:text-xl font-bold text-gray-800">
+                  กรุณาลงทะเบียนหรือเข้าสู่ระบบด้วยอีเมล Google
+                </p>
+                <div className="inline-block bg-red-50 text-[#800000] border border-red-200 px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold">
+                  กำหนดสิทธิ์ผู้ใช้งานต้องเป็นอีเมล @mfu.ac.th เท่านั้น
+                </div>
+              </div>
+
+              <div>
+                <button
+                  type="button"
+                  onClick={handleGoogleSignIn}
+                  className="w-full flex items-center justify-center gap-3 bg-[#800000] hover:bg-[#660000] active:scale-[0.99] text-white font-bold py-4 sm:py-5 px-8 rounded-2xl shadow-lg hover:shadow-xl transition-all cursor-pointer border border-[#800000] text-base sm:text-lg"
+                >
+                  <LogIn className="w-6 h-6 text-[#FFD700]" />
+                  <span>ลงทะเบียนด้วยอีเมล Google (@mfu.ac.th)</span>
+                </button>
+              </div>
+
+              <div className="border-t border-gray-200 pt-6 space-y-3.5 text-left text-sm sm:text-base text-gray-700">
+                <div className="flex items-start gap-3">
+                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-[#800000] font-bold text-xs shrink-0 mt-0.5">
+                    1
+                  </span>
+                  <span className="leading-snug font-medium">
+                    สำหรับการบันทึกข้อมูลเข้าระบบ Checklist ส่วนการเงินฯ
+                  </span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-[#800000] font-bold text-xs shrink-0 mt-0.5">
+                    2
+                  </span>
+                  <span className="leading-snug font-medium">
+                    ตรวจสอบประวัติและแก้ไขข้อมูลเอกสารย้อนหลัง
+                  </span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-[#800000] font-bold text-xs shrink-0 mt-0.5">
+                    3
+                  </span>
+                  <span className="leading-snug font-medium">
+                    รองรับการดาวน์โหลดหรือสั่งพิมพ์แบบฟอร์ม Checklist
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+
+        {/* Footer */}
+        <footer className="py-4 text-center text-xs sm:text-sm text-gray-400 space-y-1">
+          <p>ส่วนการเงินและบัญชี มหาวิทยาลัยแม่ฟ้าหลวง DIVISION OF FINANCE AND ACCOUNTING MAE FAH LUANG UNIVERSITY</p>
+        </footer>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-800">

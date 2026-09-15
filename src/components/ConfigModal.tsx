@@ -17,7 +17,7 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
 }) => {
   const [gasUrl, setGasUrl] = useState(config.gasWebhookUrl || '');
   const [spreadsheetId, setSpreadsheetId] = useState(config.spreadsheetId || '1Uxci-m9YhP7SFYF098f-kVdYgyXyRQ0gTuIUYghX3Fc');
-  const [sheetName, setSheetName] = useState(config.sheetName || '2570-CHECKLIST');
+  const [sheetName, setSheetName] = useState(config.sheetName || '(2570)CHECKLIST');
   const [saved, setSaved] = useState(false);
 
   if (!isOpen) return null;
@@ -90,7 +90,7 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
               value={sheetName}
               onChange={(e) => setSheetName(e.target.value)}
               className="w-full px-3 py-2 text-xs border rounded-lg focus:ring-2 focus:ring-[#800000] focus:outline-none"
-              placeholder="2570-CHECKLIST"
+              placeholder="(2570)CHECKLIST"
               required
             />
           </div>
@@ -116,7 +116,7 @@ export const ConfigModal: React.FC<ConfigModalProps> = ({
             <div className="flex items-center justify-between border-b border-gray-200 pb-2">
               <div>
                 <p className="font-bold text-[#800000]">ขั้นตอนการเชื่อมต่อกับ Google Sheet (ทำครั้งเดียว):</p>
-                <p className="text-[11px] text-gray-500">เพื่อให้อัปเดตข้อมูลลงชีท "2570-CHECKLIST" อัตโนมัติ</p>
+                <p className="text-[11px] text-gray-500">เพื่อให้อัปเดตข้อมูลลงชีท "(2570)CHECKLIST" อัตโนมัติ</p>
               </div>
               <button
                 type="button"

@@ -34,7 +34,7 @@ function loadConfig(): ServerConfig {
   }
   return {
     spreadsheetId: "1Uxci-m9YhP7SFYF098f-kVdYgyXyRQ0gTuIUYghX3Fc",
-    sheetName: "2570-CHECKLIST",
+    sheetName: "(2570)CHECKLIST",
     gasWebhookUrl: process.env.GAS_WEBHOOK_URL || "",
   };
 }
@@ -171,6 +171,7 @@ const cabinetMap: Record<string, string> = {
   "ส่วนนิติการ": "A1",
   "ศูนย์กีฬามหาวิทยาลัยแม่ฟ้าหลวง": "A2",
   "สถาบันชาและกาแฟ แห่งมหาวิทยาลัยแม่ฟ้าหลวง": "A2",
+  "หน่วยความร่วมมือทางวิชาการฝรั่งเศส-อนุภูมิภาคลุ่มแม่น้ำโขง": "A3",
   "โครงการจัดตั้งหน่วยความร่วมมือทางวิชาการฝรั่งเศส-อนุภูมิภาคลุ่มแม่น้ำโขง": "A3",
   "ศูนย์ความเป็นเลิศทางด้านการวิจัยเชื้อรา": "A4",
   "หน่วยตรวจสอบภายใน": "A4",
@@ -180,13 +181,19 @@ const cabinetMap: Record<string, string> = {
   "ศูนย์ความเป็นเลิศด้านนวัตกรรมผลิตภัณฑ์ธรรมชาติ": "A7",
   "สถาบันนวัตกรรมการเรียนรู้มหาวิทยาลัยแม่ฟ้าหลวง": "A8",
   "สถาบันอนุรักษ์ พัฒนาทรัพยากรธรรมชาติและสิ่งแวดล้อม เพื่อความยั่งยืน": "A9",
+  "ศูนย์จัดการทรัพยากรธรรมชาติและสิ่งแวดล้อม": "A9",
   "สำนักงานบัณฑิตศึกษา": "A10",
   "ส่วนจัดการทรัพย์สินทางปัญญาและนวัตกรรม": "A11",
+  "ผลิตภัณฑ์จากผลงานการวิจัยมหาวิทยาลัยแม่ฟ้าหลวง": "A11",
   "สำนักงานจัดการทรัพย์สินและรายได้": "A12",
-  "โครงการจัดตั้งพิพิธภัณฑ์อารยธรรมลุ่มน้ำโขง": "A12",
+  "สถาบันศิลปวัฒนธรรมและอารยธรรมลุ่มน้ำโขง": "A12",
+  "ศูนย์หนังสือ": "A12",
+  "ศูนย์บริการที่พัก": "A12",
+  "ศูนย์บริการอาหาร": "A12",
   "โรงพยาบาลศูนย์การแพทย์มหาวิทยาลัยแม่ฟ้าหลวง": "A13",
   "สำนักงานให้คำปรึกษาและช่วยเหลือนักศึกษา": "A14",
-  "ศูนย์การแพทย์มหาวิทยาลัยแม่ฟ้าหลวง": "A14",
+  "โรงพยาบาลมหาวิทยาลัยแม่ฟ้าหลวง กรุงเทพมหานคร": "A14",
+  "หน่วยประสานงานมหาวิทยาลัยแม่ฟ้าหลวง กรุงเทพฯ": "A15",
   "ศูนย์บรรณสารและสื่อการศึกษา (ห้องสมุด)": "B1",
   "ศูนย์บริการวิชาการ": "B2",
   "ศูนย์เครื่องมือวิทยาศาสตร์และเทคโนโลยี": "B3",
@@ -198,12 +205,17 @@ const cabinetMap: Record<string, string> = {
   "ส่วนประชาสัมพันธ์": "B8",
   "ส่วนพัสดุ": "B9",
   "ส่วนทะเบียนและประมวลผล": "B10",
+  "ฝ่ายรับนักศึกษา": "B10",
   "ส่วนบริหารงานวิจัย": "B11",
+  "ศูนย์วิจัยและนวัตกรรมสังคมเชิงพื้นที่ เพื่อการพัฒนาอย่างยั่งยืน": "B11",
   "ส่วนพัฒนานักศึกษา": "B12",
+  "หน่วยงานส่งเสริมการบริการนักศึกษาเบ็ดเสร็จ (M for U Centre)": "B12",
   "ส่วนพัฒนาความสัมพันธ์ระหว่างประเทศ": "B13",
   "ส่วนประกันคุณภาพการศึกษาและพัฒนาหลักสูตร": "B14",
   "ส่วนจัดหางานและฝึกงานของนักศึกษา": "B15",
+  "ส่วนการเงินและบัญชี": "B16",
   "สำนักวิชาศิลปศาสตร์": "C1",
+  "สำนักวิชาเทคโนโลยีดิจิทัลประยุกต์": "C2",
   "สำนักวิชาเทคโนโลยีสารสนเทศ": "C2",
   "สำนักวิชานิติศาสตร์": "C3",
   "สำนักวิชาวิทยาศาสตร์": "C4",
@@ -212,18 +224,42 @@ const cabinetMap: Record<string, string> = {
   "สำนักวิชาวิทยาศาสตร์เครื่องสำอาง": "C7",
   "สำนักวิชาการจัดการ": "C8",
   "สำนักวิชาพยาบาลศาสตร์": "C9",
+  "สำนักวิชาเวชศาสตร์ชะลอวัยและฟื้นฟูสุขภาพ": "C10",
   "สำนักวิชาแพทยศาสตร์": "C11",
   "สำนักวิชาทันตแพทยศาสตร์": "C12",
   "สำนักวิชานวัตกรรมสังคม": "C13",
   "สำนักวิชาจีนวิทยา": "C14",
-  "สำนักวิชาการแพทย์บูรณาการ": "C15"
+  "สำนักวิชาการแพทย์บูรณาการ": "C15",
 };
+
+function getCabinetIdServer(deptName: string): string {
+  if (!deptName) return "N/A";
+  const trimmed = deptName.trim();
+  if (cabinetMap[trimmed]) return cabinetMap[trimmed];
+
+  const lines = trimmed.split("\n").map((s) => s.trim());
+  if (lines[0] && cabinetMap[lines[0]]) return cabinetMap[lines[0]];
+
+  const match = trimmed.match(/^([\u0E00-\u0E7F0-9\s()/\-.,]+?)([A-Za-z].*)?$/);
+  if (match && match[1]) {
+    const thaiPart = match[1].trim();
+    if (cabinetMap[thaiPart]) return cabinetMap[thaiPart];
+  }
+
+  for (const key in cabinetMap) {
+    if (trimmed.includes(key) || key.includes(trimmed)) {
+      return cabinetMap[key];
+    }
+  }
+
+  return "N/A";
+}
 
 // Helper to fetch live records directly from Google Sheet via gviz endpoint
 async function fetchSheetRecordsServer(): Promise<RecordItem[] | null> {
   try {
     const spreadsheetId = currentConfig.spreadsheetId || "1Uxci-m9YhP7SFYF098f-kVdYgyXyRQ0gTuIUYghX3Fc";
-    const sheetName = currentConfig.sheetName || "2570-CHECKLIST";
+    const sheetName = currentConfig.sheetName || "(2570)CHECKLIST";
     const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}&t=${Date.now()}`;
     const res = await fetch(url, { headers: { "Cache-Control": "no-cache" } });
     if (!res.ok) return null;
@@ -258,7 +294,7 @@ async function fetchSheetRecordsServer(): Promise<RecordItem[] | null> {
         type: getVal(7),
         docNumbers: getVal(8),
         attachments: attachments,
-        cabinetId: getVal(10) || cabinetMap[getVal(5)] || "N/A",
+        cabinetId: getVal(10) || getCabinetIdServer(getVal(5)) || "N/A",
         keypass: getVal(11) || keyPassMap[getVal(7)] || "1",
         pdfUrl: getVal(12) || "",
         description: getVal(13),
@@ -392,7 +428,7 @@ app.post("/api/process", async (req, res) => {
     const displayDocId = prefix + ("000" + nextNum).slice(-4);
 
     const kp = keyPassMap[formData.type] || "1";
-    const cabId = cabinetMap[formData.dept] || "N/A";
+    const cabId = getCabinetIdServer(formData.dept);
 
     const newRecord: RecordItem = {
       id: displayDocId,
@@ -431,7 +467,7 @@ app.post("/api/process", async (req, res) => {
           cabinetId: cabId,
           keypass: kp,
           spreadsheetId: currentConfig.spreadsheetId || "1Uxci-m9YhP7SFYF098f-kVdYgyXyRQ0gTuIUYghX3Fc",
-          sheetName: currentConfig.sheetName || "2570-CHECKLIST",
+          sheetName: currentConfig.sheetName || "(2570)CHECKLIST",
         });
 
         if (gasResponse) {
@@ -467,7 +503,7 @@ app.put("/api/history/:id", async (req, res) => {
     }
 
     const kp = updatedData.type ? (keyPassMap[updatedData.type] || "1") : dbRecords[index].keypass;
-    const cabId = updatedData.dept ? (cabinetMap[updatedData.dept] || "N/A") : dbRecords[index].cabinetId;
+    const cabId = updatedData.dept ? getCabinetIdServer(updatedData.dept) : dbRecords[index].cabinetId;
 
     const existing = dbRecords[index];
     const updatedRecord: RecordItem = {
@@ -501,7 +537,7 @@ app.put("/api/history/:id", async (req, res) => {
           displayDocId: updatedRecord.id,
           id: updatedRecord.id,
           spreadsheetId: updatedData.spreadsheetId || currentConfig.spreadsheetId || "1Uxci-m9YhP7SFYF098f-kVdYgyXyRQ0gTuIUYghX3Fc",
-          sheetName: updatedData.sheetName || currentConfig.sheetName || "2570-CHECKLIST",
+          sheetName: updatedData.sheetName || currentConfig.sheetName || "(2570)CHECKLIST",
         });
       } catch (e) {
         console.warn("GAS update forward warning:", e);

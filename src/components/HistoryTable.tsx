@@ -122,7 +122,7 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200 text-gray-700 font-bold">
-                <th className="py-3 px-4 min-w-[140px]">ทะเบียน/เวลา/ตู้</th>
+                <th className="py-3 px-4 min-w-[140px]">เลขทะเบียนรับ</th>
                 <th className="py-3 px-4 min-w-[180px] text-red-700">ประเภท / อว. / เลขที่</th>
                 <th className="py-3 px-4 min-w-[200px]">เรื่อง</th>
                 <th className="py-3 px-4 min-w-[180px]">หน่วยงาน/ผู้ส่ง</th>
@@ -158,10 +158,7 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
                       <div className="text-[11px] text-gray-500 font-medium">{item.formattedTime}</div>
                       <div className="text-[10px] text-gray-400 mt-1 flex flex-wrap gap-1">
                         <span className="bg-gray-100 px-1.5 py-0.5 rounded border">ตู้: {item.cabinetId}</span>
-                        <span className="bg-[#800000]/10 text-[#800000] px-1.5 py-0.5 rounded font-bold">
-                          KP: {item.keypass}
-                        </span>
-                        {item.status && (
+                        {item.status && !item.status.includes('ดึงข้อมูลจาก') && (
                           <span className="bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-medium">
                             {item.status}
                           </span>
@@ -189,7 +186,12 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({
 
                     {/* Department & Sender */}
                     <td className="py-3 px-4 align-top">
-                      <div className="font-semibold text-gray-800 leading-snug">{item.dept}</div>
+                      <div className="font-semibold text-gray-800 leading-snug">
+                        <div>{item.dept.split('\n')[0]}</div>
+                        {item.dept.split('\n')[1] && (
+                          <div className="text-[11px] text-gray-500 font-normal">{item.dept.split('\n')[1]}</div>
+                        )}
+                      </div>
                       <div className="text-gray-600 mt-0.5 font-medium">{item.name}</div>
                       {item.phone && (
                         <div className="text-[10px] text-gray-400 mt-0.5">โทร: {item.phone}</div>
