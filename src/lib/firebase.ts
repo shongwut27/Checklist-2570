@@ -13,6 +13,8 @@ provider.addScope('https://www.googleapis.com/auth/presentations');
 let isSigningIn = false;
 let cachedAccessToken: string | null = localStorage.getItem('google_access_token');
 
+export const getAccessToken = () => cachedAccessToken;
+
 export const initAuth = (
   onAuthSuccess?: (user: User, token: string) => void,
   onAuthFailure?: () => void
@@ -54,7 +56,7 @@ export const googleSignIn = async (): Promise<{ user: User; accessToken: string 
   }
 };
 
-export const googleSignOut = async (): Promise<void> => {
+export const logout = async (): Promise<void> => {
   try {
     await auth.signOut();
     cachedAccessToken = null;
