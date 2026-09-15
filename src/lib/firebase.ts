@@ -2,7 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, User } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBn3I_3MgHxTRVo_xB_FxTNJ7Otvto8pyU",
+  apiKey: "วาง_API_KEY_ที่คัดลอกมาตรงนี้", // <--- นำ API Key จริงมาวางแทนที่ตรงนี้
   authDomain: "checklist-a3cbd.firebaseapp.com",
   projectId: "checklist-a3cbd",
   storageBucket: "checklist-a3cbd.firebasestorage.app",
