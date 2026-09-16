@@ -259,7 +259,7 @@ export default function App() {
         setRecords(prev => [rec, ...prev]);
         return { status: 'success', record: rec };
       } else {
-        return { status: 'error', msg: json.msg || 'ไม่สามารถสร้างบันทึกได้' };
+        return { status: 'error', msg: json?.msg || (!res.ok ? `เกิดข้อผิดพลาดจากเซิร์ฟเวอร์ (สถานะ ${res.status})` : 'ไม่สามารถสร้างบันทึกได้') };
       }
     } catch (err: any) {
       return { status: 'error', msg: err.message };

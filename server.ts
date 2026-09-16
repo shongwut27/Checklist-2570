@@ -310,7 +310,7 @@ async function fetchSheetRecordsServer(): Promise<RecordItem[] | null> {
 }
 
 // GET /api/history (Fetch directly from Google Sheet with fallback to local db)
-app.get("/api/history", async (req, res) => {
+app.get(["/api/history", "/history"], async (req, res) => {
   const sheetRecords = await fetchSheetRecordsServer();
   if (sheetRecords && sheetRecords.length > 0) {
     if (dbRecords && dbRecords.length > 0) {
@@ -352,7 +352,7 @@ app.get("/api/history", async (req, res) => {
 });
 
 // POST /api/sync (Sync from Google Sheet to local server)
-app.post("/api/sync", (req, res) => {
+app.post(["/api/sync", "/sync"], (req, res) => {
   if (req.body && req.body.records) {
     dbRecords = req.body.records;
     saveRecords(dbRecords);
@@ -390,7 +390,7 @@ async function sendPostToGas(url: string, payload: any) {
 }
 
 // POST /api/process
-app.post("/api/process", async (req, res) => {
+app.post(["/api/process", "/process"], async (req, res) => {
   try {
     const formData = req.body;
     const timestamp = new Date();
@@ -491,7 +491,7 @@ app.post("/api/process", async (req, res) => {
 });
 
 // PUT /api/history/:id (Edit checklist record)
-app.put("/api/history/:id", async (req, res) => {
+app.put(["/api/history/:id", "/history/:id"], async (req, res) => {
   try {
     const { id } = req.params;
     const updatedData = req.body;
@@ -550,7 +550,7 @@ app.put("/api/history/:id", async (req, res) => {
 });
 
 // DELETE /api/history (Reset test data)
-app.delete("/api/history", (req, res) => {
+app.delete(["/api/history", "/history"], (req, res) => {
   dbRecords = [];
   saveRecords(dbRecords);
   res.json({ status: "success", message: "History cleared" });
