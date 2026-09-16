@@ -231,20 +231,23 @@ export default function App() {
             // Append row in Google Sheet
             let appendSuccess = await appendRecordToSheet(rec, currentToken, webhookConfig.spreadsheetId, webhookConfig.sheetName);
             if (!appendSuccess) {
-              // Token might be expired, try refreshing via Google popup
-              const authRes = await googleSignIn().catch(() => null);
-              if (authRes?.accessToken) {
-                setGoogleToken(authRes.accessToken);
-                setGoogleUser(authRes.user);
-                appendSuccess = await appendRecordToSheet(rec, authRes.accessToken, webhookConfig.spreadsheetId, webhookConfig.sheetName);
-              }
+              return {
+                status: 'error',
+                msg: 'ไม่สามารถบันทึกข้อมูลลง Google Sheet ได้ (สิทธิ์การเข้าถึงชีตไม่เพียงพอหรือหมดอายุ กรุณากดออกจากระบบแล้วเข้าสู่ระบบ Google ใหม่อีกครั้ง)',
+              };
             }
-            if (!appendSuccess) {
-              alert("ไม่สามารถบันทึกข้อมูลลง Google Sheet ได้ กรุณาตรวจสอบสิทธิ์การเข้าถึงชีต หรือลองเข้าสู่ระบบ Google ใหม่อีกครั้ง");
-            }
-          } catch (wsErr) {
+          } catch (wsErr: any) {
             console.warn('Workspace sync error:', wsErr);
+            return {
+              status: 'error',
+              msg: 'เกิดข้อผิดพลาดในการบันทึกลง Google Sheet: ' + (wsErr?.message || 'โปรดลองใหม่อีกครั้ง'),
+            };
           }
+        } else if (!webhookConfig.gasWebhookUrl) {
+          return {
+            status: 'error',
+            msg: 'กรุณาเข้าสู่ระบบ Google (@mfu.ac.th) เพื่อบันทึกข้อมูลลง Google Sheet',
+          };
         }
 
         // Trigger celebratory confetti!

@@ -416,6 +416,13 @@ app.post(["/api/process", "/process"], async (req, res) => {
 
     const prefix = "70" + month;
 
+    // Sync latest records from Google Sheet to ensure sequence number is accurate
+    const liveSheetRecords = await fetchSheetRecordsServer();
+    if (liveSheetRecords && liveSheetRecords.length > 0) {
+      dbRecords = liveSheetRecords;
+      saveRecords(dbRecords);
+    }
+
     // Calculate sequence for current month
     const currentMonthRecords = dbRecords.filter((r) => r.id.startsWith(prefix));
     let nextNum = 1;

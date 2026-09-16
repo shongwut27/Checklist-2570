@@ -24,6 +24,7 @@ const app = initializeApp(resolvedConfig);
 export const auth = getAuth(app);
 
 export const provider = new GoogleAuthProvider();
+provider.addScope('https://www.googleapis.com/auth/spreadsheets');
 
 let isSigningIn = false;
 let cachedAccessToken: string | null = localStorage.getItem('google_access_token');

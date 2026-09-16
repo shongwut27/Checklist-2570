@@ -347,6 +347,11 @@ app.post(["/api/process", "/process"], async (req, res) => {
     const secs = ("0" + thaiDate.getSeconds()).slice(-2);
     const formattedTime = `${day}/${month}/${yearStr} ${hours}:${mins}:${secs}`;
     const prefix = "70" + month;
+    const liveSheetRecords = await fetchSheetRecordsServer();
+    if (liveSheetRecords && liveSheetRecords.length > 0) {
+      dbRecords = liveSheetRecords;
+      saveRecords(dbRecords);
+    }
     const currentMonthRecords = dbRecords.filter((r) => r.id.startsWith(prefix));
     let nextNum = 1;
     if (currentMonthRecords.length > 0) {
