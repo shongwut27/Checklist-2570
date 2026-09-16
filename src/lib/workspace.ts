@@ -60,7 +60,12 @@ function getValueForPlaceholderKey(key: string, record: ChecklistRecord): string
 /**
  * Append a row to Google Sheet (2570)CHECKLIST using Google Sheets API
  */
-export async function appendRecordToSheet(record: ChecklistRecord, accessToken: string, spreadsheetId: string, sheetName: string) {
+export async function appendRecordToSheet(
+  record: ChecklistRecord,
+  accessToken: string,
+  spreadsheetId: string,
+  sheetName: string
+): Promise<{ success: boolean; error?: string; status?: number }> {
   try {
     const rowValues = [
       record.id,
@@ -99,12 +104,13 @@ export async function appendRecordToSheet(record: ChecklistRecord, accessToken: 
       if (res.status === 401) {
         localStorage.removeItem('google_access_token');
       }
-      return false;
+      const rawMsg = errJson?.error?.message || `HTTP ${res.status}`;
+      return { success: false, error: rawMsg, status: res.status };
     }
-    return true;
-  } catch (err) {
+    return { success: true };
+  } catch (err: any) {
     console.error('Failed to append to Google Sheet:', err);
-    return false;
+    return { success: false, error: err?.message || 'Network error' };
   }
 }
 

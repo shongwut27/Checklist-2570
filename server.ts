@@ -314,6 +314,7 @@ app.get(["/api/history", "/history"], async (req, res) => {
   const sheetRecords = await fetchSheetRecordsServer();
   if (sheetRecords && sheetRecords.length > 0) {
     if (dbRecords && dbRecords.length > 0) {
+      const sheetIds = new Set(sheetRecords.map((s) => String(s.id).trim()));
       const merged = sheetRecords.map((sRec) => {
         const localRec = dbRecords.find((l) => String(l.id).trim() === String(sRec.id).trim());
         if (localRec && localRec.status === "แก้ไขแล้ว") {
@@ -336,7 +337,8 @@ app.get(["/api/history", "/history"], async (req, res) => {
         }
         return sRec;
       });
-      dbRecords = merged;
+      const localOnly = dbRecords.filter((l) => !sheetIds.has(String(l.id).trim()));
+      dbRecords = [...merged, ...localOnly];
     } else {
       dbRecords = sheetRecords;
     }

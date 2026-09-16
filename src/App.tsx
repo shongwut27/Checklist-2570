@@ -229,11 +229,24 @@ export default function App() {
         if (currentToken) {
           try {
             // Append row in Google Sheet
-            let appendSuccess = await appendRecordToSheet(rec, currentToken, webhookConfig.spreadsheetId, webhookConfig.sheetName);
-            if (!appendSuccess) {
+            const appendRes = await appendRecordToSheet(rec, currentToken, webhookConfig.spreadsheetId, webhookConfig.sheetName);
+            if (!appendRes.success) {
+              const errorDetail = appendRes.error || '';
+              if (errorDetail.includes('insufficient') || errorDetail.includes('scope') || appendRes.status === 401) {
+                return {
+                  status: 'error',
+                  msg: 'สิทธิ์การเข้าถึง Google Sheets ยังไม่ได้รับอนุญาต กรุณากด "ออกจากระบบ" ที่มุมขวาบน แล้วกด "เข้าสู่ระบบด้วย Google" ใหม่อีกครั้ง และกดยินยอมให้สิทธิ์เข้าถึง Google Sheets',
+                };
+              }
+              if (errorDetail.includes('caller does not have permission') || appendRes.status === 403) {
+                return {
+                  status: 'error',
+                  msg: `บัญชี Google (${googleUser?.email || userEmail}) ไม่มีสิทธิ์แก้ไขไฟล์ชีตนี้ กรุณาแชร์สิทธิ์ Editor ใน Google Drive ให้กับอีเมลนี้ หรือตรวจสอบการเชื่อมต่อ`,
+                };
+              }
               return {
                 status: 'error',
-                msg: 'ไม่สามารถบันทึกข้อมูลลง Google Sheet ได้ (สิทธิ์การเข้าถึงชีตไม่เพียงพอหรือหมดอายุ กรุณากดออกจากระบบแล้วเข้าสู่ระบบ Google ใหม่อีกครั้ง)',
+                msg: `ไม่สามารถบันทึกข้อมูลลง Google Sheet ได้: ${errorDetail}`,
               };
             }
           } catch (wsErr: any) {
