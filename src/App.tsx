@@ -214,8 +214,14 @@ export default function App() {
       // Artificial wait time (1.8s) for rocket flight experience as requested
       await new Promise((r) => setTimeout(r, 1800));
 
-      const json = await res.json();
-      if (json.status === 'success' && json.record) {
+      let json: any = null;
+      try {
+        json = await res.json();
+      } catch (parseErr) {
+        console.warn('Response was not JSON:', parseErr);
+      }
+
+      if (json && json.status === 'success' && json.record) {
         let rec: ChecklistRecord = json.record;
 
         // Direct Google Workspace API sync if signed in
