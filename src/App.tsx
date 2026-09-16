@@ -85,7 +85,6 @@ export default function App() {
         setGoogleUser(res.user);
         setGoogleToken(res.accessToken);
         setUserEmail(email);
-        alert(`เข้าสู่ระบบด้วย Google เรียบร้อยแล้ว (${email})`);
       }
     } catch (err: any) {
       console.error('Google login failed:', err);
@@ -228,39 +227,11 @@ export default function App() {
         let currentToken = googleToken || getAccessToken();
         if (currentToken) {
           try {
-            // Append row in Google Sheet
-            const appendRes = await appendRecordToSheet(rec, currentToken, webhookConfig.spreadsheetId, webhookConfig.sheetName);
-            if (!appendRes.success) {
-              const errorDetail = appendRes.error || '';
-              if (errorDetail.includes('insufficient') || errorDetail.includes('scope') || appendRes.status === 401) {
-                return {
-                  status: 'error',
-                  msg: 'สิทธิ์การเข้าถึง Google Sheets ยังไม่ได้รับอนุญาต กรุณากด "ออกจากระบบ" ที่มุมขวาบน แล้วกด "เข้าสู่ระบบด้วย Google" ใหม่อีกครั้ง และกดยินยอมให้สิทธิ์เข้าถึง Google Sheets',
-                };
-              }
-              if (errorDetail.includes('caller does not have permission') || appendRes.status === 403) {
-                return {
-                  status: 'error',
-                  msg: `บัญชี Google (${googleUser?.email || userEmail}) ไม่มีสิทธิ์แก้ไขไฟล์ชีตนี้ กรุณาแชร์สิทธิ์ Editor ใน Google Drive ให้กับอีเมลนี้ หรือตรวจสอบการเชื่อมต่อ`,
-                };
-              }
-              return {
-                status: 'error',
-                msg: `ไม่สามารถบันทึกข้อมูลลง Google Sheet ได้: ${errorDetail}`,
-              };
-            }
+            // Append row in Google Sheet if token has direct access
+            await appendRecordToSheet(rec, currentToken, webhookConfig.spreadsheetId, webhookConfig.sheetName);
           } catch (wsErr: any) {
             console.warn('Workspace sync error:', wsErr);
-            return {
-              status: 'error',
-              msg: 'เกิดข้อผิดพลาดในการบันทึกลง Google Sheet: ' + (wsErr?.message || 'โปรดลองใหม่อีกครั้ง'),
-            };
           }
-        } else if (!webhookConfig.gasWebhookUrl) {
-          return {
-            status: 'error',
-            msg: 'กรุณาเข้าสู่ระบบ Google (@mfu.ac.th) เพื่อบันทึกข้อมูลลง Google Sheet',
-          };
         }
 
         // Trigger celebratory confetti!
